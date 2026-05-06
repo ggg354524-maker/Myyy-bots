@@ -14,7 +14,7 @@ TOKEN = '8691167970:AAHjcP9A0WFBpDtbau0lQGvw77nogd43A_M'
 bot = telebot.TeleBot(TOKEN)
 
 base_words = ["وين", "كيف", "يا ولد", "اصمل", "وش تسوي", "وش فيك", "طيب", "كمل", "يا مسكين"]
-EASY_CHALLENGES = [" ، ".join(random.sample(base_words, len(base_words))) for _ in range(10000)]
+EASY_CHALLENGES = [" ".join(random.sample(base_words, len(base_words))) for _ in range(10000)]
 
 phil_base = [
     "نحن مجرد ركام من الذكريات ننتظر حتمية الفناء في صمت",
