@@ -25,17 +25,11 @@ app = Client("my_account", api_id=API_ID, api_hash=API_HASH, session_string=STRI
 input_lines = [
     "وش تسوي ادعس عليك يابن المصخره ي هطف ي ديوث", "كس ام عرضك وش تسوي يعني تبيني انيك ف كس عرضك ي ابن الضعيفتين", "ادعس عليك ي مصخره ي ابن المصخره ي جديد ي كس اختك", "كس اختك اصمل وش تسوي ي مصخره وش تسوي ي ديوث", "وش بك ي ابن القحبتين ب تصمل معي اليوم ي ديوث تفهم ؟ 😭✌🏽",
     "كسس عرضك ب تصمل معي صدقني ي ابن المصخره 🦄", "وش تسوي ي ضعيف يابن القحبه ي كسسس عرضك اصمل ل انيك ف اختك", "كسسس اختك اصمل وش تسوي ي ابن القحبتين", "وش بك ي ابن المصخره ي كسس عرضك وش تسوي ي ابن الضعيفه", "وش تسوي ادعس عليك ي ابن الضعيفتين ي ابن المصخرتين اصمل وش تسوي",
-    "ي ابن القحبتين ي ديوث وش تسوي ي كسسس امك اصمل", "اشق كس امك ي ابن القحبتين اصمل وش تسوي ي ضعيف ي مصخره", "كس امك وش تسوي وش بك س كسس اختك ي ضعيف", "يابن القحبتين اصمل وش تسوي وش بك ي ديوث وش تسوي قل", "كس اختك ي ديوث اصمل وش تسوي وش بك ي ابن المصخره",
+    "ي ابن القحبتين ي ديوث وش تسوي ي كسسس امك اصمل", "اشق كس امك ي ابن القحبتين اصمل وش تسوي ي ضعيف يابن المصخره", "كس امك وش تسوي وش بك س كسس اختك ي ضعيف", "يابن القحبتين اصمل وش تسوي وش بك ي ديوث وش تسوي قل", "كس اختك ي ديوث اصمل وش تسوي وش بك ي ابن المصخره",
     "وش بك وش تسوي اشق كس امك اصمل وش تسوي 🌪️☘️", "يابن القحبه كس عرضك وش تسوي ي ضعيف يابن الشرموطتين ي مصخره ي كسس عرضك"
 ]
 
 is_running = False
-
-async def get_speed():
-    try:
-        async for msg in app.get_chat_history("me", limit=1):
-            return float(msg.text)
-    except: return 2.0 
 
 @app.on_message(filters.me & filters.text)
 async def controller(client, message):
@@ -43,21 +37,16 @@ async def controller(client, message):
     if message.text == "ادعس عليك ي مصخره":
         if is_running: return
         is_running = True
-        big_list = []
-        while len(big_list) < 16000:
-            temp = input_lines.copy()
-            random.shuffle(temp)
-            big_list.extend(temp)
-        big_list = big_list[:16000]
-        for line in big_list:
-            if not is_running: break
+        while is_running:
+            line = random.choice(input_lines)
             try:
                 await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-                await asyncio.sleep(0.1)
                 await client.send_message(message.chat.id, line)
-                await asyncio.sleep(await get_speed())
-            except: await asyncio.sleep(5)
+                await asyncio.sleep(1.5)
+            except:
+                await asyncio.sleep(5)
     elif message.text == "هههه وش بك ؟":
         is_running = False
 
-app.run()
+if __name__ == "__main__":
+    app.run()
