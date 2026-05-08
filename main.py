@@ -1,61 +1,63 @@
-import telebot
-import time
+import asyncio
 import random
+from pyrogram import Client, filters
+from pyrogram.enums import ChatAction
 from flask import Flask
 from threading import Thread
 
-app = Flask('')
-@app.route('/')
-def home(): return "Bot is Running!"
-def run(): app.run(host='0.0.0.0', port=8080)
-def keep_alive(): Thread(target=run).start()
+web = Flask('')
+@web.route('/')
+def home(): return "Online"
+def run(): web.run(host='0.0.0.0', port=8080)
+def keep_alive():
+    t = Thread(target=run)
+    t.daemon = True
+    t.start()
 
-TOKEN = '8691167970:AAHjcP9A0WFBpDtbau0lQGvw77nogd43A_M'
-bot = telebot.TeleBot(TOKEN)
+keep_alive()
 
-base_words = ["وين", "كيف", "يا ولد", "اصمل", "وش تسوي", "وش فيك", "طيب", "كمل", "يا مسكين"]
-EASY_CHALLENGES = [" ".join(random.sample(base_words, len(base_words))) for _ in range(10000)]
+API_ID = 36483598
+API_HASH = '188e25271d55c4939783589fefacde78'
+STRING_SESSION = "AQIssg4AeNvWllOnyYO7N9ODBA0R7ci8g0qL942dHIXZy1TulXszq7LCjJcEgGiN4pxc41CWh3Houg19X681xaCjcLJKLqAhn57p4DnCy5_N2i0YZmAGiySV9HUTIfVdT6sW2PjRdagz9Om8T6q5MopGq4KxEgksIlvfMFl7Svdbu0SzjyV9FrUysd0-1DOSExHUxff8ah72fMYg0K6XwSq5p_R6AHcfyc00IjfXtxEE5KMG-mjfFMHD3tCvpV1JWKuHy7F6lnS0MIXXuYYvomk04cGQtRQ60w-7ooq18FTNy-JFb3zwsZaTdjRhjk9hGPPDIfbV-_qo9XAHhEUIefezvLfjuwAAAAH2umIhAA"
 
-phil_base = [
-    "نحن مجرد ركام من الذكريات ننتظر حتمية الفناء في صمت",
-    "الحياة دائرة مفرغة من العبث نكرر فيها خيبات من سبقونا",
-    "الزمن يسرق منا ما تبقى من دهشة حتى نتلاشى كالهباء",
-    "كل اجتماع هو مشروع عزاء مؤجل ننتظر فيه دورنا تلو الآخر",
-    "نحن غرباء في عالم لا يبالي محاصرون بين العدم والعدم"
+app = Client("my_account", api_id=API_ID, api_hash=API_HASH, session_string=STRING_SESSION)
+
+input_lines = [
+    "وش تسوي ادعس عليك يابن المصخره ي هطف ي ديوث", "كس ام عرضك وش تسوي يعني تبيني انيك ف كس عرضك ي ابن الضعيفتين", "ادعس عليك ي مصخره ي ابن المصخره ي جديد ي كس اختك", "كس اختك اصمل وش تسوي ي مصخره وش تسوي ي ديوث", "وش بك ي ابن القحبتين ب تصمل معي اليوم ي ديوث تفهم ؟ 😭✌🏽",
+    "كسس عرضك ب تصمل معي صدقني ي ابن المصخره 🦄", "وش تسوي ي ضعيف يابن القحبه ي كسسس عرضك اصمل ل انيك ف اختك", "كسسس اختك اصمل وش تسوي ي ابن القحبتين", "وش بك ي ابن المصخره ي كسس عرضك وش تسوي ي ابن الضعيفه", "وش تسوي ادعس عليك ي ابن الضعيفتين ي ابن المصخرتين اصمل وش تسوي",
+    "ي ابن القحبتين ي ديوث وش تسوي ي كسسس امك اصمل", "اشق كس امك ي ابن القحبتين اصمل وش تسوي ي ضعيف ي مصخره", "كس امك وش تسوي وش بك س كسس اختك ي ضعيف", "يابن القحبتين اصمل وش تسوي وش بك ي ديوث وش تسوي قل", "كس اختك ي ديوث اصمل وش تسوي وش بك ي ابن المصخره",
+    "وش بك وش تسوي اشق كس امك اصمل وش تسوي 🌪️☘️", "يابن القحبه كس عرضك وش تسوي ي ضعيف يابن الشرموطتين ي مصخره ي كسس عرضك"
 ]
-PHIL_CHALLENGES = [random.choice(phil_base) for _ in range(10000)]
 
-user_data = {}
+is_running = False
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.reply_to(message, "ارحب، اكتب (فس) أو (سهل)")
+async def get_speed():
+    try:
+        async for msg in app.get_chat_history("me", limit=1):
+            return float(msg.text)
+    except: return 2.0 
 
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    chat_id = message.chat.id
-    text = message.text.strip()
-    name = message.from_user.first_name 
+@app.on_message(filters.me & filters.text)
+async def controller(client, message):
+    global is_running
+    if message.text == "ادعس عليك ي مصخره":
+        if is_running: return
+        is_running = True
+        big_list = []
+        while len(big_list) < 16000:
+            temp = input_lines.copy()
+            random.shuffle(temp)
+            big_list.extend(temp)
+        big_list = big_list[:16000]
+        for line in big_list:
+            if not is_running: break
+            try:
+                await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+                await asyncio.sleep(0.1)
+                await client.send_message(message.chat.id, line)
+                await asyncio.sleep(await get_speed())
+            except: await asyncio.sleep(5)
+    elif message.text == "هههه وش بك ؟":
+        is_running = False
 
-    if text == "فس":
-        target_text = random.choice(PHIL_CHALLENGES)
-        user_data[chat_id] = {'text': target_text, 'start': time.time()}
-        bot.send_message(chat_id, target_text)
-        return
-    
-    if text == "سهل":
-        target_text = random.choice(EASY_CHALLENGES)
-        user_data[chat_id] = {'text': target_text, 'start': time.time()}
-        bot.send_message(chat_id, target_text)
-        return
-
-    if chat_id in user_data:
-        if text == user_data[chat_id]['text']:
-            duration = round(time.time() - user_data[chat_id]['start'], 2)
-            result_msg = f"بطل يا {name}#\nسرعتك هيا {duration} ثانية"
-            bot.reply_to(message, result_msg)
-            del user_data[chat_id]
-
-if __name__ == "__main__":
-    keep_alive()
-    bot.polling(none_stop=True)
+app.run()
