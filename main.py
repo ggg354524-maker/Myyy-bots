@@ -1,52 +1,91 @@
-import asyncio
 import random
-from pyrogram import Client, filters
-from pyrogram.enums import ChatAction
-from flask import Flask
-from threading import Thread
+import sys
+import asyncio
+import time
+from telethon import TelegramClient, events
+from telethon.errors import FloodWaitError
 
-web = Flask('')
-@web.route('/')
-def home(): return "Online"
-def run(): web.run(host='0.0.0.0', port=8080)
-def keep_alive():
-    t = Thread(target=run)
-    t.daemon = True
-    t.start()
+api_id = 36483598
+api_hash = '188e25271d55c4939783589fefacde78'
 
-keep_alive()
-
-API_ID = 36483598
-API_HASH = '188e25271d55c4939783589fefacde78'
-STRING_SESSION = "AQIssg4AeNvWllOnyYO7N9ODBA0R7ci8g0qL942dHIXZy1TulXszq7LCjJcEgGiN4pxc41CWh3Houg19X681xaCjcLJKLqAhn57p4DnCy5_N2i0YZmAGiySV9HUTIfVdT6sW2PjRdagz9Om8T6q5MopGq4KxEgksIlvfMFl7Svdbu0SzjyV9FrUysd0-1DOSExHUxff8ah72fMYg0K6XwSq5p_R6AHcfyc00IjfXtxEE5KMG-mjfFMHD3tCvpV1JWKuHy7F6lnS0MIXXuYYvomk04cGQtRQ60w-7ooq18FTNy-JFb3zwsZaTdjRhjk9hGPPDIfbV-_qo9XAHhEUIefezvLfjuwAAAAH2umIhAA"
-
-app = Client("my_account", api_id=API_ID, api_hash=API_HASH, session_string=STRING_SESSION)
-
-input_lines = [
-    "وش تسوي ادعس عليك يابن المصخره ي هطف ي ديوث", "كس ام عرضك وش تسوي يعني تبيني انيك ف كس عرضك ي ابن الضعيفتين", "ادعس عليك ي مصخره ي ابن المصخره ي جديد ي كس اختك", "كس اختك اصمل وش تسوي ي مصخره وش تسوي ي ديوث", "وش بك ي ابن القحبتين ب تصمل معي اليوم ي ديوث تفهم ؟ 😭✌🏽",
-    "كسس عرضك ب تصمل معي صدقني ي ابن المصخره 🦄", "وش تسوي ي ضعيف يابن القحبه ي كسسس عرضك اصمل ل انيك ف اختك", "كسسس اختك اصمل وش تسوي ي ابن القحبتين", "وش بك ي ابن المصخره ي كسس عرضك وش تسوي ي ابن الضعيفه", "وش تسوي ادعس عليك ي ابن الضعيفتين ي ابن المصخرتين اصمل وش تسوي",
-    "ي ابن القحبتين ي ديوث وش تسوي ي كسسس امك اصمل", "اشق كس امك ي ابن القحبتين اصمل وش تسوي ي ضعيف يابن المصخره", "كس امك وش تسوي وش بك س كسس اختك ي ضعيف", "يابن القحبتين اصمل وش تسوي وش بك ي ديوث وش تسوي قل", "كس اختك ي ديوث اصمل وش تسوي وش بك ي ابن المصخره",
-    "وش بك وش تسوي اشق كس امك اصمل وش تسوي 🌪️☘️", "يابن القحبه كس عرضك وش تسوي ي ضعيف يابن الشرموطتين ي مصخره ي كسس عرضك"
+words_list = [
+    "كس امك", "يابن الشرموطه", "يابن الضعيفتين", 
+    "يابن الشرموطتين", "يابن القحبتين", "ي ابن الديوث", 
+    "كس اختك", "ادعس امك", "ياكس امك", 
+    "ي ابن الضعيفه", "ادوس مامتك", "كس عيلتك",
+    "ي ابن العاهرتين", "ي ابن المصخرتين", "يا هطف", "ي مصخره", "مضحكه"
 ]
 
+special_words = ["اسسسرع", "اجري معاي", "لا تشرددد", "اسررررع", "هيا اكتب معاي"]
+emojis = ["🦋✌🏽😭", "☘️"]
+
+client = TelegramClient('saloum', api_id, api_hash)
 is_running = False
 
-@app.on_message(filters.me & filters.text)
-async def controller(client, message):
+@client.on(events.NewMessage(outgoing=True))
+async def handler(event):
     global is_running
-    if message.text == "ادعس عليك ي مصخره":
-        if is_running: return
-        is_running = True
-        while is_running:
-            line = random.choice(input_lines)
-            try:
-                await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-                await client.send_message(message.chat.id, line)
-                await asyncio.sleep(1.5)
-            except:
-                await asyncio.sleep(5)
-    elif message.text == "هههه وش بك ؟":
-        is_running = False
+    
+    if event.is_private and event.to_id.user_id == (await client.get_me()).id:
+        if event.raw_text == "خلاص":
+            is_running = False
+            await event.edit("⚠️ STOPPED")
+            return
 
-if __name__ == "__main__":
-    app.run()
+        if event.raw_text.startswith("اصمل "):
+            parts = event.raw_text.split(" ")
+            enemy_name = parts[1] if len(parts) > 1 else "هطف"
+            speed = float(parts[2]) if len(parts) > 2 else 2.0
+            is_running = True
+            await event.edit(f"🚀 RUNNING\nTarget: {enemy_name}\nSpeed: {speed}")
+            
+            target_chat = None
+            async for dialog in client.iter_dialogs():
+                if dialog.is_group:
+                    target_chat = dialog.id
+                    break
+            
+            if not target_chat:
+                await event.edit("❌ NO GROUP")
+                is_running = False
+                return
+
+            last_special_time = time.time()
+            last_enemy_time = time.time()
+            last_sent_line = ""
+
+            while is_running:
+                current_time = time.time()
+
+                if current_time - last_enemy_time >= 15:
+                    try:
+                        await client.send_message(target_chat, f"ي {enemy_name} {random.choice(words_list)} 🦋")
+                        last_enemy_time = current_time
+                    except: pass
+
+                if current_time - last_special_time >= 10:
+                    random.shuffle(special_words)
+                    try:
+                        await client.send_message(target_chat, f"{' '.join(special_words)} {random.choice(emojis)}")
+                        last_special_time = current_time
+                    except: pass
+
+                while True:
+                    selected = random.sample(words_list, 3)
+                    new_line = " ".join(selected)
+                    if new_line != last_sent_line:
+                        last_sent_line = new_line
+                        break
+
+                try:
+                    async with client.action(target_chat, 'typing'):
+                        await asyncio.sleep(speed * 0.6)
+                        await client.send_message(target_chat, new_line)
+                    await asyncio.sleep(speed * 0.4)
+                except FloodWaitError as e:
+                    await asyncio.sleep(e.seconds)
+                except:
+                    await asyncio.sleep(speed)
+
+client.start()
+client.run_until_disconnected()
