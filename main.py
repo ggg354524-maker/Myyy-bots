@@ -1,12 +1,13 @@
 import random
-import sys
 import asyncio
 import time
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from telethon.errors import FloodWaitError
 
 api_id = 36483598
 api_hash = '188e25271d55c4939783589fefacde78'
+session_str = "AQIssg4AeNvWllOnyYO7N9ODBA0R7ci8g0qL942dHIXZy1TulXszq7LCjJcEgGiN4pxc41CWh3Houg19X681xaCjcLJKLqAhn57p4DnCy5_N2i0YZmAGiySV9HUTIfVdT6sW2PjRdagz9Om8T6q5MopGq4KxEgksIlvfMFl7Svdbu0SzjyV9FrUysd0-1DOSExHUxff8ah72fMYg0K6XwSq5p_R6AHcfyc00IjfXtxEE5KMG-mjfFMHD3tCvpV1JWKuHy7F6lnS0MIXXuYYvomk04cGQtRQ60w-7ooq18FTNy-JFb3zwsZaTdjRhjk9hGPPDIfbV-_qo9XAHhEUIefezvLfjuwAAAAH2umIhAA"
 
 words_list = [
     "كس امك", "يابن الشرموطه", "يابن الضعيفتين", 
@@ -19,7 +20,7 @@ words_list = [
 special_words = ["اسسسرع", "اجري معاي", "لا تشرددد", "اسررررع", "هيا اكتب معاي"]
 emojis = ["🦋✌🏽😭", "☘️"]
 
-client = TelegramClient('saloum', api_id, api_hash)
+client = TelegramClient(StringSession(session_str), api_id, api_hash)
 is_running = False
 
 @client.on(events.NewMessage(outgoing=True))
@@ -56,7 +57,6 @@ async def handler(event):
 
             while is_running:
                 current_time = time.time()
-
                 if current_time - last_enemy_time >= 15:
                     try:
                         await client.send_message(target_chat, f"ي {enemy_name} {random.choice(words_list)} 🦋")
@@ -87,5 +87,6 @@ async def handler(event):
                 except:
                     await asyncio.sleep(speed)
 
+print("Source Sloum is ONLINE...")
 client.start()
 client.run_until_disconnected()
